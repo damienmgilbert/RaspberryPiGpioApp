@@ -6,10 +6,6 @@ public class RpiService
 {
 
     #region Fields
-    public string BaseUrl => this.baseUrl;
-
-    public int Port => this.port;
-
     string baseUrl;
     GrpcChannel channel;
     Commander.CommanderClient client;
@@ -57,7 +53,7 @@ public class RpiService
         var result = await this.client.OpenPinAsync(new OpenPinRequest { PinNumber = pinNumber });
         return result.IsPinOpen;
     }
-    public async Task<string> Read(int pinNumber)
+    public async Task<string> ReadAsync(int pinNumber)
     {
         var result = await this.client.ReadAsync(new ReadRequest { PinNumber = pinNumber });
         return result.PinValue;
@@ -69,11 +65,16 @@ public class RpiService
         return result.IsSet;
     }
     public void SetPort(int port) => this.port = port;
-    public async Task<bool> Write(int pinNumber, string pinValue)
+    public async Task<bool> WriteAsync(int pinNumber, string pinValue)
     {
         var result = await this.client.WriteAsync(new WriteRequest { PinNumber = pinNumber, PinValue = pinValue });
         return result.DidWrite;
     }
+    #endregion
+
+    #region Public properties
+    public string BaseUrl => this.baseUrl;
+    public int Port => this.port;
     #endregion
 
 }

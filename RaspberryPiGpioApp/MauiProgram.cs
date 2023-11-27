@@ -4,14 +4,33 @@ using Microsoft.Extensions.Logging;
 using RaspberryPiGpioApp.Services;
 using RaspberryPiGpioApp.ViewModels;
 using RaspberryPiGpioApp.Views;
+using Serilog;
 
 namespace RaspberryPiGpioApp;
-
 public static class MauiProgram
 {
+
+    #region Private methods
+    private static MauiAppBuilder RegisterRoutes(this MauiAppBuilder builder)
+    {
+        builder.Services.AddTransientWithShellRoute<HomePage, HomeViewModel>("Home");
+        builder.Services.AddTransientWithShellRoute<BoardPage, BoardViewModel>("Board");
+        return builder;
+    }
+    private static MauiAppBuilder RegisterServices(this MauiAppBuilder builder)
+    {
+        builder.Services.AddSingleton<RpiService>();
+        return builder;
+    }
+    #endregion
+
+    #region Public methods
     public static MauiApp CreateMauiApp()
     {
         var builder = MauiApp.CreateBuilder();
+
+        Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Debug().CreateLogger();
+
         builder
             .UseMauiApp<App>()
             // Initialize the .NET MAUI Community Toolkit by adding the below line of code
@@ -23,22 +42,11 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
-#if DEBUG
-		builder.Logging.AddDebug();
-#endif
+
+        builder.Logging.AddSerilog(dispose: true);
         Ioc.Default.ConfigureServices(builder.Services.BuildServiceProvider());
         return builder.Build();
     }
+    #endregion
 
-    private static MauiAppBuilder RegisterRoutes(this MauiAppBuilder builder)
-    {
-        builder.Services.AddTransientWithShellRoute<HomePage, HomeViewModel>("Home");
-        return builder;
-    }
-
-    private static MauiAppBuilder RegisterServices(this MauiAppBuilder builder)
-    {
-        builder.Services.AddSingleton<RpiService>();
-        return builder;
-    }
 }

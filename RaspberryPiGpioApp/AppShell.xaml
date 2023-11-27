@@ -5,12 +5,17 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:RaspberryPiGpioApp"
     xmlns:views="clr-namespace:RaspberryPiGpioApp.Views"
-    Title="RaspberryPiGpioApp"
-    Shell.FlyoutBehavior="Disabled">
+    Title="Raspberry Pi 4 Gpio App"
+    Shell.FlyoutBehavior="Flyout">
 
     <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate views:HomePage}"
         Route="Home" />
+
+    <ShellContent
+        Title="Board"
+        ContentTemplate="{DataTemplate views:BoardPage}"
+        Route="Board" />
 
 </Shell>

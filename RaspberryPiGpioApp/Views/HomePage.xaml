@@ -17,45 +17,72 @@
         </Style>
     </ContentPage.Resources>
 
-    <VerticalStackLayout Spacing="10">
-        <Button Command="{Binding ConnectToDeviceCommand}" Text="Connect" />
+    <ScrollView>
+        <VerticalStackLayout Spacing="10">
+            <Button Command="{Binding ConnectToDeviceCommand}" Text="Connect" />
 
-        <Entry
-            Keyboard="Text"
-            ReturnCommand="{Binding ChangeBaseUrlCommand}"
-            Text="{Binding BaseUrl, Mode=TwoWay}" />
+            <Entry
+                Keyboard="Text"
+                ReturnCommand="{Binding ChangeBaseUrlCommand}"
+                Text="{Binding BaseUrl, Mode=TwoWay}" />
 
-        <Entry
-            Keyboard="Numeric"
-            ReturnCommand="{Binding ChangePortCommand}"
-            Text="{Binding Port, Mode=TwoWay}" />
+            <Entry
+                Keyboard="Numeric"
+                ReturnCommand="{Binding ChangePortCommand}"
+                Text="{Binding Port, Mode=TwoWay}" />
 
-        <Button Command="{Binding GetInformationCommand}" Text="Get info" />
-        <Label Text="{Binding PinCount, StringFormat='Pin Count: {0}'}" />
-        <Label Text="{Binding NumberingScheme, StringFormat='Numbering Scheme: {0}'}" />
+            <Button Command="{Binding GetInformationCommand}" Text="Get info" />
+            <Label Text="{Binding PinCount, Mode=OneWay, StringFormat='Pin Count: {0}'}" />
+            <Label Text="{Binding NumberingScheme, Mode=OneWay, StringFormat='Numbering Scheme: {0}'}" />
 
-        <Entry
-            Keyboard="Numeric"
-            Text="{Binding PinNumber, Mode=TwoWay}"
-            TextColor="White">
-            <Entry.Behaviors>
-                <toolkit:NumericValidationBehavior
-                    Flags="ValidateOnValueChanged"
-                    InvalidStyle="{StaticResource InvalidEntryStyle}"
-                    IsValid="{Binding IsPinNumberValid, Mode=TwoWay}"
-                    MaximumDecimalPlaces="0"
-                    MaximumValue="28"
-                    MinimumValue="2"
-                    ValidStyle="{StaticResource ValidEntryStyle}" />
-            </Entry.Behaviors>
-        </Entry>
+            <Entry
+                Keyboard="Numeric"
+                Text="{Binding PinNumber, Mode=TwoWay}"
+                TextColor="White">
+                <Entry.Behaviors>
+                    <toolkit:NumericValidationBehavior
+                        Flags="ValidateOnValueChanged"
+                        InvalidStyle="{StaticResource InvalidEntryStyle}"
+                        IsValid="{Binding IsPinNumberValid, Mode=TwoWay}"
+                        MaximumDecimalPlaces="0"
+                        MaximumValue="28"
+                        MinimumValue="2"
+                        ValidStyle="{StaticResource ValidEntryStyle}" />
+                </Entry.Behaviors>
+            </Entry>
 
-        <Rectangle BackgroundColor="White" HeightRequest="5" />
+            <Rectangle BackgroundColor="White" HeightRequest="5" />
 
-        <Label Text="{Binding PinNumber, StringFormat='Selected Pin is {0}'}" />
+            <Label Text="{Binding PinNumber, Mode=OneWay, StringFormat='Selected Pin is {0}'}" />
 
-        <Button Command="{Binding OpenPinCommand}" Text="Open Pin" />
+            <Button Command="{Binding GetPinModeCommand}" Text="Get Pin Information" />
 
-        <Button Command="{Binding ClosePinCommand}" Text="Close Pin" />
-    </VerticalStackLayout>
+            <Label Text="{Binding PinMode, Mode=OneWay}" />
+
+            <Picker
+                Title="Select a pin mode"
+                ItemsSource="{Binding PinModes, Mode=OneWay}"
+                SelectedItem="{Binding SelectedPinMode, Mode=TwoWay}">
+                <Picker.Behaviors>
+                    <toolkit:EventToCommandBehavior Command="{Binding SelectedPinModeChangedCommand}" EventName="SelectedIndexChanged" />
+                </Picker.Behaviors>
+            </Picker>
+
+            <Button Command="{Binding OpenPinCommand}" Text="Open Pin" />
+
+            <Button Command="{Binding ClosePinCommand}" Text="Close Pin" />
+
+            <Button Command="{Binding ReadCommand}" Text="Read Pin Value" />
+
+            <Label Text="{Binding PinValue, Mode=OneWay, StringFormat='Pin Value = {0}'}" />
+
+            <Picker Title="Select a pin value to write to the pin" ItemsSource="{Binding WriteablePinValues, Mode=OneWay}" SelectedItem="{Binding SelectedWritablePinValue, Mode=TwoWay}">
+                <Picker.Behaviors>
+                    <toolkit:EventToCommandBehavior Command="{Binding SelectedWriteablePinValueChangedCommand}" EventName="SelectedIndexChanged" />
+                </Picker.Behaviors>
+            </Picker>
+
+            <Button Command="{Binding WriteCommand}" Text="Write Pin Value" />
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
