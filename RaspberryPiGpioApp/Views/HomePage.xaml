@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="RaspberryPiGpioApp.Views.HomePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewModels="clr-namespace:RaspberryPiGpioApp.ViewModels"
+    Title="HomePage"
+    x:DataType="viewModels:HomeViewModel">
+
+    <ContentPage.Resources>
+        <Style x:Key="InvalidEntryStyle" TargetType="Entry">
+            <Setter Property="TextColor" Value="Red" />
+        </Style>
+        <Style x:Key="ValidEntryStyle" TargetType="Entry">
+            <Setter Property="TextColor" Value="Black" />
+        </Style>
+    </ContentPage.Resources>
+
+    <VerticalStackLayout Spacing="10">
+        <Button Command="{Binding ConnectToDeviceCommand}" Text="Connect" />
+
+        <Entry
+            Keyboard="Text"
+            ReturnCommand="{Binding ChangeBaseUrlCommand}"
+            Text="{Binding BaseUrl, Mode=TwoWay}" />
+
+        <Entry
+            Keyboard="Numeric"
+            ReturnCommand="{Binding ChangePortCommand}"
+            Text="{Binding Port, Mode=TwoWay}" />
+
+        <Button Command="{Binding GetInformationCommand}" Text="Get info" />
+        <Label Text="{Binding PinCount, StringFormat='Pin Count: {0}'}" />
+        <Label Text="{Binding NumberingScheme, StringFormat='Numbering Scheme: {0}'}" />
+
+        <Entry
+            Keyboard="Numeric"
+            Text="{Binding PinNumber, Mode=TwoWay}"
+            TextColor="White">
+            <Entry.Behaviors>
+                <toolkit:NumericValidationBehavior
+                    Flags="ValidateOnValueChanged"
+                    InvalidStyle="{StaticResource InvalidEntryStyle}"
+                    IsValid="{Binding IsPinNumberValid, Mode=TwoWay}"
+                    MaximumDecimalPlaces="0"
+                    MaximumValue="28"
+                    MinimumValue="2"
+                    ValidStyle="{StaticResource ValidEntryStyle}" />
+            </Entry.Behaviors>
+        </Entry>
+
+        <Rectangle BackgroundColor="White" HeightRequest="5" />
+
+        <Label Text="{Binding PinNumber, StringFormat='Selected Pin is {0}'}" />
+
+        <Button Command="{Binding OpenPinCommand}" Text="Open Pin" />
+
+        <Button Command="{Binding ClosePinCommand}" Text="Close Pin" />
+    </VerticalStackLayout>
+</ContentPage>
