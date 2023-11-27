@@ -15,6 +15,7 @@ public static class MauiProgram
     {
         builder.Services.AddTransientWithShellRoute<HomePage, HomeViewModel>("Home");
         builder.Services.AddTransientWithShellRoute<BoardPage, BoardViewModel>("Board");
+        builder.Services.AddTransientWithShellRoute<EditPinPage, EditPinViewModel>("EditPin");
         return builder;
     }
     private static MauiAppBuilder RegisterServices(this MauiAppBuilder builder)

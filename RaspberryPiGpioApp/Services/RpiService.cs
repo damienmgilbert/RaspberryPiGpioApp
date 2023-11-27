@@ -23,30 +23,35 @@ public class RpiService
     #endregion
 
     #region Public methods
-    public async Task<bool> ClosePin(int pinNumber)
+    public async Task<bool> ClosePinAsync(int pinNumber)
     {
         var result = await this.client.ClosePinAsync(new ClosePinRequest { PinNumber = pinNumber });
         return result.IsPinClosed;
     }
-    public void Connet()
+    public void Connect()
     {
         this.channel = GrpcChannel.ForAddress($"http://{this.baseUrl}:{this.port}");
         this.client = new Commander.CommanderClient(channel);
     }
-    public async Task<string> GetNumberingScheme()
+    public async Task<string> GetNumberingSchemeAsync()
     {
         var result = await this.client.GetNumberingSchemeAsync(new GetNumberingSchemeRequest());
         return result.NumberingScheme;
     }
-    public async Task<int> GetPinCount()
+    public async Task<int> GetPinCountAsync()
     {
         var result = await this.client.GetPinCountAsync(new GetPinCountRequest());
         return result.PinCount;
     }
-    public async Task<string> GetPinMode(int pinNumber)
+    public async Task<string> GetPinModeAsync(int pinNumber)
     {
         var result = await this.client.GetPinModeAsync(new GetPinModeRequest { PinNumber = pinNumber });
         return result.PinMode;
+    }
+    public async Task<bool> IsPinOpenAsync(int pinNumber)
+    {
+        var result = await this.client.IsPinOpenAsync(new IsPinOpenRequest { PinNumber = pinNumber });
+        return result.IsPinOpen;
     }
     public async Task<bool> OpenPin(int pinNumber)
     {
@@ -59,7 +64,7 @@ public class RpiService
         return result.PinValue;
     }
     public void SetBaseAddress(string address) => this.baseUrl = address;
-    public async Task<bool> SetPinMode(int pinNumber, string pinMode)
+    public async Task<bool> SetPinModeAsync(int pinNumber, string pinMode)
     {
         var result = await this.client.SetPinModeAsync(new SetPinModeRequest { PinNumber = pinNumber, PinMode = pinMode });
         return result.IsSet;

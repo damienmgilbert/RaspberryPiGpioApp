@@ -10,12 +10,16 @@
     <CollectionView
         ItemsLayout="VerticalGrid, 2"
         ItemsSource="{Binding BoardItems, Mode=OneWay}"
+        SelectedItem="{Binding SelectedBoardItem, Mode=TwoWay}"
         SelectionMode="Single">
         <CollectionView.ItemTemplate>
             <DataTemplate>
                 <SwipeView x:DataType="models:BoardItem">
                     <SwipeView.RightItems>
-                        <SwipeItem IsVisible="{Binding IsGPIO, Mode=OneWay}" Text="Edit GPIO" />
+                        <SwipeItem
+                            Command="{Binding EditGPIOCommand, Source={x:RelativeSource AncestorType={x:Type viewModels:BoardViewModel}}}"
+                            IsVisible="{Binding IsGPIO, Mode=OneWay}"
+                            Text="Edit GPIO" />
                     </SwipeView.RightItems>
                     <Border
                         Stroke="Black"

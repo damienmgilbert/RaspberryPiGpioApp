@@ -8,6 +8,10 @@
     Title="Raspberry Pi 4 Gpio App"
     Shell.FlyoutBehavior="Flyout">
 
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="True" />
+    </Shell.BackButtonBehavior>
+
     <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate views:HomePage}"

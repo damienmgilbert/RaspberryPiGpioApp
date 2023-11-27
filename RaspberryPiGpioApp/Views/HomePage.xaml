@@ -76,7 +76,10 @@
 
             <Label Text="{Binding PinValue, Mode=OneWay, StringFormat='Pin Value = {0}'}" />
 
-            <Picker Title="Select a pin value to write to the pin" ItemsSource="{Binding WriteablePinValues, Mode=OneWay}" SelectedItem="{Binding SelectedWritablePinValue, Mode=TwoWay}">
+            <Picker
+                Title="Select a pin value to write to the pin"
+                ItemsSource="{Binding WriteablePinValues, Mode=OneWay}"
+                SelectedItem="{Binding SelectedWritablePinValue, Mode=TwoWay}">
                 <Picker.Behaviors>
                     <toolkit:EventToCommandBehavior Command="{Binding SelectedWriteablePinValueChangedCommand}" EventName="SelectedIndexChanged" />
                 </Picker.Behaviors>

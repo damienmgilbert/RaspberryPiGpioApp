@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using RaspberryPiGpioApp.Models;
+using RaspberryPiGpioApp.Views;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -7,14 +9,36 @@ using System.Linq;
 namespace RaspberryPiGpioApp.ViewModels;
 public partial class BoardViewModel : ObservableRecipient
 {
+
+    #region Fields
     [ObservableProperty]
     private ObservableCollection<BoardItem> boardItems = [];
+    [ObservableProperty]
+    private BoardItem? selectedBoardItem = null;
+    #endregion
 
+    #region Constructors
     public BoardViewModel()
     {
         this.BoardItems = GetBoardItems();
     }
+    #endregion
 
+    #region Private methods
+    [RelayCommand]
+    private async Task EditGPIO()
+    {
+        if (this.SelectedBoardItem is null)
+        {
+            return;
+        }
+
+        var navigationParameter = new ShellNavigationQueryParameters
+        {
+            { "BoardItem", this.SelectedBoardItem }
+        };
+        await Shell.Current.GoToAsync($"EditPin", navigationParameter);
+    }
     private ObservableCollection<BoardItem> GetBoardItems()
     {
         ObservableCollection<BoardItem> boardItems =
@@ -63,4 +87,6 @@ public partial class BoardViewModel : ObservableRecipient
 
         return boardItems;
     }
+    #endregion
+
 }

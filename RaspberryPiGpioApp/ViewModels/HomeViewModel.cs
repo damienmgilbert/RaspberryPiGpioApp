@@ -1,7 +1,8 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Maui.Alerts;
 using Microsoft.Extensions.Logging;
 using RaspberryPiGpioApp.Services;
 using System;
@@ -9,10 +10,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CommunityToolkit.Maui.Core;
 
 namespace RaspberryPiGpioApp.ViewModels;
-public partial class HomeViewModel : ObservableRecipient
+public partial class HomeViewModel : BaseViewModel
 {
 
     #region Fields
@@ -27,15 +27,19 @@ public partial class HomeViewModel : ObservableRecipient
     [ObservableProperty]
     private int pinCount;
     [ObservableProperty]
+    private string pinMode = string.Empty;
+    [ObservableProperty]
     private int pinNumber;
     [ObservableProperty]
-    private int port;
-
+    string pinValue = string.Empty;
     [ObservableProperty]
-    private string pinMode = string.Empty;
-
+    private int port;
     [ObservableProperty]
     private string selectedPinMode = string.Empty;
+    [ObservableProperty]
+    private string selectedWritablePinValue = string.Empty;
+    [ObservableProperty]
+    string writablePinValue = string.Empty;
     #endregion
 
     #region Constructors
@@ -52,16 +56,6 @@ public partial class HomeViewModel : ObservableRecipient
     {
         this._rpiService.SetBaseAddress(this.BaseUrl);
     }
-
-    private async Task ShowToastMessage(string message)
-    {
-        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-        ToastDuration duration = ToastDuration.Short;
-        double fontSize = 16;
-        var toast = Toast.Make(message, duration, fontSize);
-        await toast.Show(cancellationTokenSource.Token);
-    }
-
     [RelayCommand]
     private void ChangePort()
     {
@@ -75,7 +69,7 @@ public partial class HomeViewModel : ObservableRecipient
             return;
         }
 
-        bool result = await this._rpiService.ClosePin(this.PinNumber);
+        bool result = await this._rpiService.ClosePinAsync(this.PinNumber);
         if (result)
         {
             await this.ShowToastMessage($"Closed pin {this.PinNumber}");
@@ -91,8 +85,8 @@ public partial class HomeViewModel : ObservableRecipient
     {
         try
         {
-            this._rpiService.Connet();
-            string result = await this._rpiService.GetNumberingScheme();
+            this._rpiService.Connect();
+            string result = await this._rpiService.GetNumberingSchemeAsync();
             this.Port = this._rpiService.Port;
             this.BaseUrl = this._rpiService.BaseUrl;
             await this.ShowToastMessage($"Connected to http//{this.BaseUrl}:{this.Port}!");
@@ -105,8 +99,8 @@ public partial class HomeViewModel : ObservableRecipient
     [RelayCommand]
     private async Task GetInformation()
     {
-        this.PinCount = await this._rpiService.GetPinCount();
-        this.NumberingScheme = await this._rpiService.GetNumberingScheme();
+        this.PinCount = await this._rpiService.GetPinCountAsync();
+        this.NumberingScheme = await this._rpiService.GetNumberingSchemeAsync();
     }
     [RelayCommand]
     private async Task GetPinMode()
@@ -116,7 +110,7 @@ public partial class HomeViewModel : ObservableRecipient
             return;
         }
 
-        this.PinMode = await this._rpiService.GetPinMode(this.PinNumber);
+        this.PinMode = await this._rpiService.GetPinModeAsync(this.PinNumber);
     }
     [RelayCommand]
     private async Task OpenPin()
@@ -138,6 +132,44 @@ public partial class HomeViewModel : ObservableRecipient
         }
     }
     [RelayCommand]
+    private async Task Read()
+    {
+        try
+        {
+            this.PinValue = await this._rpiService.ReadAsync(this.PinNumber);
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex, "Unable to read pin value");
+        }
+    }
+    [RelayCommand]
+    private async Task SelectedPinModeChanged()
+    {
+        try
+        {
+            bool result = await this._rpiService.SetPinModeAsync(this.PinNumber, this.SelectedPinMode);
+            if (result)
+            {
+                await this.ShowToastMessage($"Set the pin mode to {this.SelectedPinMode} for pin {this.PinNumber}");
+            }
+            else
+            {
+                await this.ShowToastMessage($"Unable to set the pin mode to {this.SelectedPinMode} for pin {this.PinNumber}");
+            }
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex, "Unable to set the pin mode to {SelectedPinMode} for pin {PinNumber}", this.SelectedPinMode, this.PinNumber);
+            await this.ShowToastMessage($"Unable to set the pin mode to {this.SelectedPinMode} for pin {this.PinNumber}");
+        }
+    }
+    [RelayCommand]
+    private async Task SelectedWriteablePinValueChanged()
+    {
+        await this.Write();
+    }
+    [RelayCommand]
     private async Task SetPinMode(string pinMode)
     {
         if (!this.IsPinNumberValid)
@@ -145,7 +177,7 @@ public partial class HomeViewModel : ObservableRecipient
             return;
         }
 
-        bool result = await this._rpiService.SetPinMode(this.PinNumber, pinMode);
+        bool result = await this._rpiService.SetPinModeAsync(this.PinNumber, pinMode);
         if (result)
         {
             await this.ShowToastMessage($"Set the pin mode to {pinMode} for pin {this.PinNumber}");
@@ -156,70 +188,7 @@ public partial class HomeViewModel : ObservableRecipient
             this._logger.LogDebug("Unable to set the pin mode to {PinMode} for pin {PinNumber}", pinMode, PinNumber);
         }
     }
-    #endregion
-
-    #region Public properties
-    public List<string> PinModes => new List<string>()
-    {
-        "InputPullUp", "InputPullDown", "Input", "Output"
-    };
-
-    public List<string> WriteablePinValues => new List<string>()
-    {
-        "HIGH", "LOW"
-    };
-    #endregion
-
-    [ObservableProperty]
-    string pinValue = string.Empty;
-
-    [RelayCommand]
-    private async Task Read()
-    {
-        try
-        {
-            this.PinValue = await this._rpiService.ReadAsync(this.PinNumber);
-        }
-        catch(Exception ex)
-        {
-            this._logger.LogError(ex, "Unable to read pin value");
-        }
-    }
-
-    [ObservableProperty]
-    string writablePinValue = string.Empty;
-
-    [RelayCommand]
-    private async Task SelectedPinModeChanged()
-    {
-        try
-        {
-            bool result = await this._rpiService.SetPinMode(this.PinNumber, this.SelectedPinMode);
-            if (result)
-            {
-                await this.ShowToastMessage($"Set the pin mode to {this.SelectedPinMode} for pin {this.PinNumber}");
-            }
-            else
-            {
-                await this.ShowToastMessage($"Unable to set the pin mode to {this.SelectedPinMode} for pin {this.PinNumber}");
-            }
-        }
-        catch(Exception ex )
-        {
-            this._logger.LogError(ex, "Unable to set the pin mode to {SelectedPinMode} for pin {PinNumber}", this.SelectedPinMode, this.PinNumber);
-            await this.ShowToastMessage($"Unable to set the pin mode to {this.SelectedPinMode} for pin {this.PinNumber}");
-        }
-    }
-
-    [ObservableProperty]
-    private string selectedWritablePinValue = string.Empty;
-
-    [RelayCommand]
-    private async Task SelectedWriteablePinValueChanged()
-    {
-        await this.Write();
-    }
-
+    
     [RelayCommand]
     private async Task Write()
     {
@@ -241,4 +210,17 @@ public partial class HomeViewModel : ObservableRecipient
             await this.ShowToastMessage($"Unable to write value of {this.SelectedWritablePinValue} to pin {this.PinNumber}");
         }
     }
+    #endregion
+
+    #region Public properties
+    public List<string> PinModes => new List<string>()
+    {
+        "InputPullUp", "InputPullDown", "Input", "Output"
+    };
+    public List<string> WriteablePinValues => new List<string>()
+    {
+        "HIGH", "LOW"
+    };
+    #endregion
+
 }
